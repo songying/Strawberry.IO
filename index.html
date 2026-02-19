@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>Strawberry.io</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="game-container">
+        <canvas id="gameCanvas" width="800" height="450"></canvas>
+
+        <!-- Main Menu -->
+        <div id="screen-menu" class="screen">
+            <div class="menu-top-bar">
+                <button id="btn-settings" class="icon-btn" title="Settings">&#9881;</button>
+                <div class="currency-display"><span class="berry-icon">&#127827;</span> <span id="berry-count">0</span></div>
+                <button id="btn-shop" class="icon-btn" title="Shop">&#128722;</button>
+            </div>
+            <div class="menu-center">
+                <h1 class="game-title">Strawberry<span class="title-io">.io</span></h1>
+                <canvas id="skinPreview" width="160" height="160"></canvas>
+                <div class="player-info">
+                    <span class="player-level">Lv. <span id="player-level">1</span></span>
+                    <div class="xp-bar"><div class="xp-fill" id="xp-fill"></div></div>
+                </div>
+            </div>
+            <button id="btn-start" class="btn-primary">START</button>
+            <div class="mode-selector">
+                <button class="mode-btn" data-mode="peaceful">&#128330; Peaceful</button>
+                <button class="mode-btn active" data-mode="normal">&#9876; Normal</button>
+                <button class="mode-btn" data-mode="extreme">&#128128; Extreme</button>
+                <button class="mode-btn" data-mode="berry">&#127827; Berry</button>
+            </div>
+            <div class="menu-footer">Designed by Jiashi &bull; Powered by Claude Code</div>
+        </div>
+
+        <!-- Shop Screen -->
+        <div id="screen-shop" class="screen hidden">
+            <div class="shop-header">
+                <button id="btn-shop-back" class="icon-btn">&#8592; Back</button>
+                <h2>Berry Shop</h2>
+                <div class="currency-display"><span class="berry-icon">&#127827;</span> <span id="berry-count-shop">0</span></div>
+            </div>
+            <div class="skin-grid" id="skin-grid"></div>
+        </div>
+
+        <!-- Settings Screen -->
+        <div id="screen-settings" class="screen hidden">
+            <div class="settings-header">
+                <button id="btn-settings-back" class="icon-btn">&#8592; Back</button>
+                <h2>Settings</h2>
+                <div style="width:80px"></div>
+            </div>
+            <div class="settings-body">
+                <label class="setting-row">
+                    <span>Sound Effects</span>
+                    <input type="checkbox" id="setting-sound" checked>
+                </label>
+                <label class="setting-row">
+                    <span>VIP Mode</span>
+                    <input type="checkbox" id="setting-vip">
+                </label>
+                <div class="setting-row stats-section">
+                    <h3>Stats</h3>
+                    <div id="stats-display"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game HUD -->
+        <div id="game-hud" class="hidden">
+            <div class="hud-top">
+                <div class="hud-territory"><span id="hud-territory-pct">0</span>%</div>
+                <div class="hud-timer" id="hud-timer">2:00</div>
+                <div class="hud-kills">Kills: <span id="hud-kills">0</span></div>
+            </div>
+            <div id="hud-leaderboard" class="hud-leaderboard"></div>
+            <div id="hud-powerup" class="hud-powerup hidden"></div>
+        </div>
+
+        <!-- Game Over Screen -->
+        <div id="screen-gameover" class="screen hidden">
+            <div class="gameover-box">
+                <h1 id="result-title">Game Over</h1>
+                <div id="result-stats" class="result-stats"></div>
+                <div class="gameover-buttons">
+                    <button id="btn-play-again" class="btn-primary">Play Again</button>
+                    <button id="btn-back-menu" class="btn-secondary">Menu</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Touch Controls -->
+        <div id="touch-controls" class="hidden">
+            <div id="joystick-zone"></div>
+        </div>
+    </div>
+
+    <script src="data.js"></script>
+    <script src="audio.js"></script>
+    <script src="game.js"></script>
+    <script src="ai.js"></script>
+    <script src="ui.js"></script>
+</body>
+</html>
