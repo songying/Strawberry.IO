@@ -17,6 +17,7 @@
             <div class="menu-top-bar">
                 <button id="btn-settings" class="icon-btn" title="Settings">&#9881;</button>
                 <div class="currency-display"><span class="berry-icon">&#127827;</span> <span id="berry-count">0</span></div>
+                <button id="btn-vip" class="icon-btn vip-menu-btn" title="Berry Pass">VIP</button>
                 <button id="btn-shop" class="icon-btn" title="Shop">&#128722;</button>
             </div>
             <div class="menu-center">
@@ -74,7 +75,6 @@
         <div id="game-hud" class="hidden">
             <div class="hud-top">
                 <div class="hud-territory"><span id="hud-territory-pct">0</span>%</div>
-                <div class="hud-timer" id="hud-timer">2:00</div>
                 <div class="hud-kills">Kills: <span id="hud-kills">0</span></div>
             </div>
             <div id="hud-leaderboard" class="hud-leaderboard"></div>
@@ -93,16 +93,115 @@
             </div>
         </div>
 
+        <!-- VIP Berry Pass Screen -->
+        <div id="screen-vip" class="screen hidden">
+            <div class="vip-header">
+                <button id="btn-vip-back" class="icon-btn">&#8592; Back</button>
+                <h2>&#127827; Berry Pass</h2>
+                <div style="width:80px"></div>
+            </div>
+            <div class="vip-body">
+                <div class="berry-pass-banner">
+                    <div class="berry-float b1">&#127827;</div>
+                    <div class="berry-float b2">&#129744;</div>
+                    <div class="berry-float b3">&#127827;</div>
+                    <div class="berry-float b4">&#129744;</div>
+                    <div class="berry-pass-logo">
+                        <span class="bp-berry">&#127827;</span>
+                        <span class="bp-text">BERRY<br>PASS</span>
+                    </div>
+                </div>
+
+                <div class="bp-card bp-card-skins">
+                    <div class="bp-card-icon">&#127912;</div>
+                    <div class="bp-card-info">
+                        <div class="bp-card-title">7 Exclusive Skins</div>
+                        <div class="bp-card-desc">Golden Strawberry, Golden Raspberry, Golden Blueberry & more</div>
+                    </div>
+                </div>
+                <div class="bp-card bp-card-badge">
+                    <div class="bp-card-icon">&#127942;</div>
+                    <div class="bp-card-info">
+                        <div class="bp-card-title">VIP Berry Badge</div>
+                        <div class="bp-card-desc">A shiny gold badge floats above your berry in-game</div>
+                    </div>
+                </div>
+                <div class="bp-card bp-card-love">
+                    <div class="bp-card-icon">&#127825;</div>
+                    <div class="bp-card-info">
+                        <div class="bp-card-title">Feed the Berry Farm</div>
+                        <div class="bp-card-desc">Your support keeps Strawberry.io growing!</div>
+                    </div>
+                </div>
+
+                <button id="vip-donate-btn" class="btn-berry-donate" type="button">&#127827; Support the Berry Farm &#127827;</button>
+                <p class="vip-note">After donating, toggle VIP in Settings to unlock your perks!</p>
+
+                <!-- Donate Modal -->
+                <div id="donate-modal" class="donate-modal hidden">
+                    <div class="donate-modal-box">
+                        <button id="donate-modal-close" class="donate-close" type="button">&times;</button>
+                        <div class="donate-berry-rain">
+                            <span class="rain-b r1">&#127827;</span>
+                            <span class="rain-b r2">&#129744;</span>
+                            <span class="rain-b r3">&#127827;</span>
+                            <span class="rain-b r4">&#127825;</span>
+                            <span class="rain-b r5">&#129744;</span>
+                        </div>
+                        <div class="donate-title">Pick Your Monthly Berry Basket!</div>
+                        <div class="donate-tiers">
+                            <a class="donate-tier" href="https://paypal.me/strawberryio/1" target="_blank" rel="noopener">
+                                <span class="tier-icon">&#127827;</span>
+                                <span class="tier-name">Seedling</span>
+                                <span class="tier-price">$1/mo</span>
+                            </a>
+                            <a class="donate-tier tier-popular" href="https://paypal.me/strawberryio/5" target="_blank" rel="noopener">
+                                <span class="tier-badge">Best Value</span>
+                                <span class="tier-icon">&#127827;&#127827;&#127827;</span>
+                                <span class="tier-name">Berry Bunch</span>
+                                <span class="tier-price">$5/mo</span>
+                            </a>
+                            <a class="donate-tier" href="https://paypal.me/strawberryio/10" target="_blank" rel="noopener">
+                                <span class="tier-icon">&#129744;&#127827;&#129744;</span>
+                                <span class="tier-name">Berry King</span>
+                                <span class="tier-price">$10/mo</span>
+                            </a>
+                        </div>
+                        <p class="donate-thanks">Monthly support keeps the berry farm growing every season!</p>
+                    </div>
+                </div>
+
+                <div class="bp-changelog">
+                    <h3>&#128240; Berry Patch Notes</h3>
+                    <div class="bp-log">
+                        <span class="bp-ver">v1.2</span>
+                        <span class="bp-dot"></span>
+                        <span>Each berry gets its own unique shape!</span>
+                    </div>
+                    <div class="bp-log">
+                        <span class="bp-ver">v1.1</span>
+                        <span class="bp-dot"></span>
+                        <span>Smooth trails & encirclement captures</span>
+                    </div>
+                    <div class="bp-log">
+                        <span class="bp-ver">v1.0</span>
+                        <span class="bp-dot"></span>
+                        <span>Strawberry.io is born!</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Mobile Touch Controls -->
         <div id="touch-controls" class="hidden">
             <div id="joystick-zone"></div>
         </div>
     </div>
 
-    <script src="data.js"></script>
-    <script src="audio.js"></script>
-    <script src="game.js"></script>
-    <script src="ai.js"></script>
-    <script src="ui.js"></script>
+    <script src="data.js?v=26"></script>
+    <script src="audio.js?v=26"></script>
+    <script src="game.js?v=26"></script>
+    <script src="ai.js?v=26"></script>
+    <script src="ui.js?v=26"></script>
 </body>
 </html>

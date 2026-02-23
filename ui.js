@@ -18,6 +18,13 @@ function loadSave() {
             }
             if (!data.settings) data.settings = DEFAULT_SAVE.settings;
             if (!data.stats) data.stats = DEFAULT_SAVE.stats;
+            // Ensure all default skins are unlocked
+            var defSkins = DEFAULT_SAVE.unlockedSkins;
+            for (var i = 0; i < defSkins.length; i++) {
+                if (data.unlockedSkins.indexOf(defSkins[i]) === -1) {
+                    data.unlockedSkins.push(defSkins[i]);
+                }
+            }
             return data;
         }
     } catch (e) {}
@@ -37,6 +44,7 @@ function showScreen(state) {
     var menuEl = document.getElementById('screen-menu');
     var shopEl = document.getElementById('screen-shop');
     var settingsEl = document.getElementById('screen-settings');
+    var vipEl = document.getElementById('screen-vip');
     var hudEl = document.getElementById('game-hud');
     var gameoverEl = document.getElementById('screen-gameover');
     var touchEl = document.getElementById('touch-controls');
@@ -44,6 +52,7 @@ function showScreen(state) {
     menuEl.classList.add('hidden');
     shopEl.classList.add('hidden');
     settingsEl.classList.add('hidden');
+    vipEl.classList.add('hidden');
     hudEl.classList.add('hidden');
     gameoverEl.classList.add('hidden');
     touchEl.classList.add('hidden');
@@ -61,6 +70,9 @@ function showScreen(state) {
         case 'SETTINGS':
             settingsEl.classList.remove('hidden');
             refreshSettings();
+            break;
+        case 'VIP':
+            vipEl.classList.remove('hidden');
             break;
         case 'PLAYING':
             hudEl.classList.remove('hidden');
@@ -107,6 +119,12 @@ function initMenu() {
         showScreen('SHOP');
     });
 
+    // VIP button
+    document.getElementById('btn-vip').addEventListener('click', function() {
+        playClickSound();
+        showScreen('VIP');
+    });
+
     // Settings button
     document.getElementById('btn-settings').addEventListener('click', function() {
         playClickSound();
@@ -137,13 +155,15 @@ function refreshMenuDisplay() {
 
 function renderSkinPreview() {
     var saveData = loadSave();
+    var skinId = saveData.selectedSkin || 'strawberry';
     var previewCanvas = document.getElementById('skinPreview');
     var pctx = previewCanvas.getContext('2d');
     var w = previewCanvas.width;
     var h = previewCanvas.height;
     var cx = w / 2;
     var cy = h / 2;
-    var skin = SKINS[saveData.selectedSkin] || SKINS.strawberry;
+    var skin = SKINS[skinId] || SKINS.strawberry;
+    var berryType = skinId.replace('golden_', '');
 
     pctx.clearRect(0, 0, w, h);
 
@@ -154,60 +174,19 @@ function renderSkinPreview() {
     pctx.fillStyle = gradient;
     pctx.fillRect(0, 0, w, h);
 
-    var r = 40; // radius for the preview strawberry
+    var r = 40;
 
-    // Berry body — proper strawberry shape: wide at top, pointed at bottom
-    pctx.fillStyle = skin.bodyColor;
-    pctx.beginPath();
-    pctx.moveTo(cx, cy - r * 0.6);
-    pctx.quadraticCurveTo(cx + r, cy - r * 0.6, cx + r * 0.9, cy + r * 0.2);
-    pctx.quadraticCurveTo(cx + r * 0.5, cy + r * 1.3, cx, cy + r * 1.2);
-    pctx.quadraticCurveTo(cx - r * 0.5, cy + r * 1.3, cx - r * 0.9, cy + r * 0.2);
-    pctx.quadraticCurveTo(cx - r, cy - r * 0.6, cx, cy - r * 0.6);
-    pctx.fill();
-    pctx.strokeStyle = 'rgba(0,0,0,0.2)';
-    pctx.lineWidth = 1.5;
-    pctx.stroke();
-
-    // Highlight / shine
-    pctx.fillStyle = 'rgba(255,255,255,0.15)';
-    pctx.beginPath();
-    pctx.ellipse(cx - r * 0.3, cy - r * 0.15, r * 0.2, r * 0.45, -0.3, 0, Math.PI * 2);
-    pctx.fill();
-
-    // Seeds
-    pctx.fillStyle = skin.seedColor;
-    var seeds = [
-        [-12, 0], [12, 0],
-        [-15, r * 0.5], [15, r * 0.5],
-        [0, r * 0.8],
-        [-8, -r * 0.3], [8, -r * 0.3],
-        [0, r * 0.4], [-6, r * 0.65], [6, r * 0.65]
-    ];
-    for (var s = 0; s < seeds.length; s++) {
-        pctx.beginPath();
-        pctx.ellipse(cx + seeds[s][0], cy + seeds[s][1], 2.5, 4, 0, 0, Math.PI * 2);
-        pctx.fill();
+    if (berryType === 'raspberry') {
+        drawPreviewRaspberry(pctx, cx, cy, r, skin);
+    } else if (berryType === 'blueberry') {
+        drawPreviewBlueberry(pctx, cx, cy, r, skin);
+    } else if (berryType === 'blackberry') {
+        drawPreviewBlackberry(pctx, cx, cy, r, skin);
+    } else {
+        drawPreviewStrawberry(pctx, cx, cy, r, skin);
     }
 
-    // Leaves — two ellipses splayed out
-    pctx.fillStyle = skin.leafColor;
-    pctx.beginPath();
-    pctx.ellipse(cx - 14, cy - r * 0.7, 18, 9, -0.4, 0, Math.PI * 2);
-    pctx.fill();
-    pctx.beginPath();
-    pctx.ellipse(cx + 14, cy - r * 0.7, 18, 9, 0.4, 0, Math.PI * 2);
-    pctx.fill();
-
-    // Stem
-    pctx.strokeStyle = skin.leafColor;
-    pctx.lineWidth = 3;
-    pctx.beginPath();
-    pctx.moveTo(cx, cy - r * 0.6);
-    pctx.lineTo(cx, cy - r * 0.95);
-    pctx.stroke();
-
-    // Eyes
+    // Eyes (same for all)
     pctx.fillStyle = '#fff';
     pctx.beginPath();
     pctx.arc(cx - 10, cy - 4, 8, 0, Math.PI * 2);
@@ -215,7 +194,6 @@ function renderSkinPreview() {
     pctx.beginPath();
     pctx.arc(cx + 10, cy - 4, 8, 0, Math.PI * 2);
     pctx.fill();
-
     pctx.fillStyle = '#111';
     pctx.beginPath();
     pctx.arc(cx - 8, cy - 3, 4, 0, Math.PI * 2);
@@ -223,6 +201,154 @@ function renderSkinPreview() {
     pctx.beginPath();
     pctx.arc(cx + 12, cy - 3, 4, 0, Math.PI * 2);
     pctx.fill();
+}
+
+function drawPreviewStrawberry(c, cx, cy, r, skin) {
+    c.fillStyle = skin.bodyColor;
+    c.beginPath();
+    c.moveTo(cx, cy - r * 0.6);
+    c.quadraticCurveTo(cx + r, cy - r * 0.6, cx + r * 0.9, cy + r * 0.2);
+    c.quadraticCurveTo(cx + r * 0.5, cy + r * 1.3, cx, cy + r * 1.2);
+    c.quadraticCurveTo(cx - r * 0.5, cy + r * 1.3, cx - r * 0.9, cy + r * 0.2);
+    c.quadraticCurveTo(cx - r, cy - r * 0.6, cx, cy - r * 0.6);
+    c.fill();
+    c.strokeStyle = 'rgba(0,0,0,0.2)';
+    c.lineWidth = 1.5;
+    c.stroke();
+    c.fillStyle = 'rgba(255,255,255,0.15)';
+    c.beginPath();
+    c.ellipse(cx - r * 0.3, cy - r * 0.15, r * 0.2, r * 0.45, -0.3, 0, Math.PI * 2);
+    c.fill();
+    c.fillStyle = skin.seedColor;
+    var seeds = [[-12, 0], [12, 0], [-15, r * 0.5], [15, r * 0.5], [0, r * 0.8], [-8, -r * 0.3], [8, -r * 0.3], [0, r * 0.4], [-6, r * 0.65], [6, r * 0.65]];
+    for (var s = 0; s < seeds.length; s++) {
+        c.beginPath();
+        c.ellipse(cx + seeds[s][0], cy + seeds[s][1], 2.5, 4, 0, 0, Math.PI * 2);
+        c.fill();
+    }
+    c.fillStyle = skin.leafColor;
+    c.beginPath();
+    c.ellipse(cx - 14, cy - r * 0.7, 18, 9, -0.4, 0, Math.PI * 2);
+    c.fill();
+    c.beginPath();
+    c.ellipse(cx + 14, cy - r * 0.7, 18, 9, 0.4, 0, Math.PI * 2);
+    c.fill();
+    c.strokeStyle = skin.leafColor;
+    c.lineWidth = 3;
+    c.beginPath();
+    c.moveTo(cx, cy - r * 0.6);
+    c.lineTo(cx, cy - r * 0.95);
+    c.stroke();
+}
+
+function drawPreviewRaspberry(c, cx, cy, r, skin) {
+    var drupelets = [
+        {x: 0, y: 0, s: 10}, {x: 0, y: -14, s: 9}, {x: 0, y: 14, s: 9}, {x: 0, y: 24, s: 7},
+        {x: -14, y: -8, s: 9}, {x: -14, y: 8, s: 9}, {x: -11, y: 20, s: 6},
+        {x: 14, y: -8, s: 9}, {x: 14, y: 8, s: 9}, {x: 11, y: 20, s: 6},
+        {x: -22, y: 0, s: 7}, {x: 22, y: 0, s: 7},
+        {x: -8, y: -22, s: 6}, {x: 8, y: -22, s: 6}
+    ];
+    c.fillStyle = 'rgba(0,0,0,0.12)';
+    for (var i = 0; i < drupelets.length; i++) {
+        c.beginPath();
+        c.arc(cx + drupelets[i].x + 1, cy + drupelets[i].y + 1, drupelets[i].s, 0, Math.PI * 2);
+        c.fill();
+    }
+    c.fillStyle = skin.bodyColor;
+    for (var i = 0; i < drupelets.length; i++) {
+        c.beginPath();
+        c.arc(cx + drupelets[i].x, cy + drupelets[i].y, drupelets[i].s, 0, Math.PI * 2);
+        c.fill();
+    }
+    c.fillStyle = 'rgba(255,255,255,0.2)';
+    for (var i = 0; i < drupelets.length; i++) {
+        c.beginPath();
+        c.arc(cx + drupelets[i].x - 2, cy + drupelets[i].y - 2, drupelets[i].s * 0.35, 0, Math.PI * 2);
+        c.fill();
+    }
+    c.fillStyle = skin.leafColor;
+    c.beginPath();
+    c.ellipse(cx - 10, cy - r * 0.8, 14, 7, -0.5, 0, Math.PI * 2);
+    c.fill();
+    c.beginPath();
+    c.ellipse(cx + 10, cy - r * 0.8, 14, 7, 0.5, 0, Math.PI * 2);
+    c.fill();
+    c.strokeStyle = skin.leafColor;
+    c.lineWidth = 3;
+    c.beginPath();
+    c.moveTo(cx, cy - r * 0.6);
+    c.lineTo(cx, cy - r * 0.95);
+    c.stroke();
+}
+
+function drawPreviewBlueberry(c, cx, cy, r, skin) {
+    c.fillStyle = skin.bodyColor;
+    c.beginPath();
+    c.arc(cx, cy + 2, r, 0, Math.PI * 2);
+    c.fill();
+    c.strokeStyle = 'rgba(0,0,0,0.2)';
+    c.lineWidth = 1.5;
+    c.stroke();
+    c.fillStyle = 'rgba(180,200,255,0.15)';
+    c.beginPath();
+    c.arc(cx, cy + 2, r * 0.92, 0, Math.PI * 2);
+    c.fill();
+    c.fillStyle = 'rgba(255,255,255,0.25)';
+    c.beginPath();
+    c.ellipse(cx - r * 0.3, cy - r * 0.2, r * 0.15, r * 0.4, -0.3, 0, Math.PI * 2);
+    c.fill();
+    c.fillStyle = skin.leafColor;
+    var calyxY = cy - r * 0.6;
+    for (var i = 0; i < 5; i++) {
+        var angle = -Math.PI / 2 + (i / 5) * Math.PI * 2;
+        var tx = cx + Math.cos(angle) * 12;
+        var ty = calyxY + Math.sin(angle) * 8;
+        c.beginPath();
+        c.ellipse(tx, ty, 6, 10, angle + Math.PI / 2, 0, Math.PI * 2);
+        c.fill();
+    }
+}
+
+function drawPreviewBlackberry(c, cx, cy, r, skin) {
+    var drupelets = [
+        {x: 0, y: -18, s: 8}, {x: 0, y: -6, s: 9}, {x: 0, y: 8, s: 9}, {x: 0, y: 20, s: 8}, {x: 0, y: 30, s: 6},
+        {x: -14, y: -12, s: 8}, {x: -14, y: 2, s: 8}, {x: -14, y: 14, s: 8}, {x: -11, y: 25, s: 6},
+        {x: 14, y: -12, s: 8}, {x: 14, y: 2, s: 8}, {x: 14, y: 14, s: 8}, {x: 11, y: 25, s: 6},
+        {x: -22, y: -2, s: 6}, {x: 22, y: -2, s: 6},
+        {x: -8, y: -26, s: 6}, {x: 8, y: -26, s: 6}
+    ];
+    c.fillStyle = 'rgba(0,0,0,0.15)';
+    for (var i = 0; i < drupelets.length; i++) {
+        c.beginPath();
+        c.arc(cx + drupelets[i].x + 1, cy + drupelets[i].y + 1, drupelets[i].s, 0, Math.PI * 2);
+        c.fill();
+    }
+    c.fillStyle = skin.bodyColor;
+    for (var i = 0; i < drupelets.length; i++) {
+        c.beginPath();
+        c.arc(cx + drupelets[i].x, cy + drupelets[i].y, drupelets[i].s, 0, Math.PI * 2);
+        c.fill();
+    }
+    c.fillStyle = 'rgba(255,255,255,0.15)';
+    for (var i = 0; i < drupelets.length; i++) {
+        c.beginPath();
+        c.arc(cx + drupelets[i].x - 1.5, cy + drupelets[i].y - 1.5, drupelets[i].s * 0.35, 0, Math.PI * 2);
+        c.fill();
+    }
+    c.fillStyle = skin.leafColor;
+    c.beginPath();
+    c.ellipse(cx - 10, cy - r * 1.0, 14, 7, -0.4, 0, Math.PI * 2);
+    c.fill();
+    c.beginPath();
+    c.ellipse(cx + 10, cy - r * 1.0, 14, 7, 0.4, 0, Math.PI * 2);
+    c.fill();
+    c.strokeStyle = skin.leafColor;
+    c.lineWidth = 3;
+    c.beginPath();
+    c.moveTo(cx, cy - r * 0.8);
+    c.lineTo(cx, cy - r * 1.2);
+    c.stroke();
 }
 
 // ============================================================
@@ -262,7 +388,7 @@ function renderShop() {
         var miniCanvas = document.createElement('canvas');
         miniCanvas.width = 50;
         miniCanvas.height = 50;
-        drawMiniSkin(miniCanvas, skin);
+        drawMiniSkin(miniCanvas, skin, skinId);
         card.appendChild(miniCanvas);
 
         // Name
@@ -317,51 +443,26 @@ function renderShop() {
     }
 }
 
-function drawMiniSkin(miniCanvas, skin) {
+function drawMiniSkin(miniCanvas, skin, skinId) {
     var mctx = miniCanvas.getContext('2d');
     var cx = miniCanvas.width / 2;
     var cy = miniCanvas.height / 2;
     var r = 16;
+    var berryType = (skinId || '').replace('golden_', '');
 
     mctx.clearRect(0, 0, miniCanvas.width, miniCanvas.height);
 
-    // Body — proper strawberry shape
-    mctx.fillStyle = skin.bodyColor;
-    mctx.beginPath();
-    mctx.moveTo(cx, cy - r * 0.6);
-    mctx.quadraticCurveTo(cx + r, cy - r * 0.6, cx + r * 0.9, cy + r * 0.2);
-    mctx.quadraticCurveTo(cx + r * 0.5, cy + r * 1.3, cx, cy + r * 1.2);
-    mctx.quadraticCurveTo(cx - r * 0.5, cy + r * 1.3, cx - r * 0.9, cy + r * 0.2);
-    mctx.quadraticCurveTo(cx - r, cy - r * 0.6, cx, cy - r * 0.6);
-    mctx.fill();
-
-    // Seeds
-    mctx.fillStyle = skin.seedColor;
-    var seeds = [[-4, 0], [4, 0], [-5, r * 0.5], [5, r * 0.5], [0, r * 0.8]];
-    for (var s = 0; s < seeds.length; s++) {
-        mctx.beginPath();
-        mctx.ellipse(cx + seeds[s][0], cy + seeds[s][1], 1.2, 2, 0, 0, Math.PI * 2);
-        mctx.fill();
+    if (berryType === 'raspberry') {
+        drawMiniRaspberry(mctx, cx, cy, r, skin);
+    } else if (berryType === 'blueberry') {
+        drawMiniBlueberry(mctx, cx, cy, r, skin);
+    } else if (berryType === 'blackberry') {
+        drawMiniBlackberry(mctx, cx, cy, r, skin);
+    } else {
+        drawMiniStrawberry(mctx, cx, cy, r, skin);
     }
 
-    // Leaves
-    mctx.fillStyle = skin.leafColor;
-    mctx.beginPath();
-    mctx.ellipse(cx - 5, cy - r * 0.7, 7, 3.5, -0.4, 0, Math.PI * 2);
-    mctx.fill();
-    mctx.beginPath();
-    mctx.ellipse(cx + 5, cy - r * 0.7, 7, 3.5, 0.4, 0, Math.PI * 2);
-    mctx.fill();
-
-    // Stem
-    mctx.strokeStyle = skin.leafColor;
-    mctx.lineWidth = 1.5;
-    mctx.beginPath();
-    mctx.moveTo(cx, cy - r * 0.6);
-    mctx.lineTo(cx, cy - r * 0.95);
-    mctx.stroke();
-
-    // Eyes
+    // Eyes (same for all)
     mctx.fillStyle = '#fff';
     mctx.beginPath();
     mctx.arc(cx - 4, cy - 2, 3, 0, Math.PI * 2);
@@ -378,6 +479,117 @@ function drawMiniSkin(miniCanvas, skin) {
     mctx.fill();
 }
 
+function drawMiniStrawberry(c, cx, cy, r, skin) {
+    c.fillStyle = skin.bodyColor;
+    c.beginPath();
+    c.moveTo(cx, cy - r * 0.6);
+    c.quadraticCurveTo(cx + r, cy - r * 0.6, cx + r * 0.9, cy + r * 0.2);
+    c.quadraticCurveTo(cx + r * 0.5, cy + r * 1.3, cx, cy + r * 1.2);
+    c.quadraticCurveTo(cx - r * 0.5, cy + r * 1.3, cx - r * 0.9, cy + r * 0.2);
+    c.quadraticCurveTo(cx - r, cy - r * 0.6, cx, cy - r * 0.6);
+    c.fill();
+    c.fillStyle = skin.seedColor;
+    var seeds = [[-4, 0], [4, 0], [-5, r * 0.5], [5, r * 0.5], [0, r * 0.8]];
+    for (var s = 0; s < seeds.length; s++) {
+        c.beginPath();
+        c.ellipse(cx + seeds[s][0], cy + seeds[s][1], 1.2, 2, 0, 0, Math.PI * 2);
+        c.fill();
+    }
+    c.fillStyle = skin.leafColor;
+    c.beginPath();
+    c.ellipse(cx - 5, cy - r * 0.7, 7, 3.5, -0.4, 0, Math.PI * 2);
+    c.fill();
+    c.beginPath();
+    c.ellipse(cx + 5, cy - r * 0.7, 7, 3.5, 0.4, 0, Math.PI * 2);
+    c.fill();
+    c.strokeStyle = skin.leafColor;
+    c.lineWidth = 1.5;
+    c.beginPath();
+    c.moveTo(cx, cy - r * 0.6);
+    c.lineTo(cx, cy - r * 0.95);
+    c.stroke();
+}
+
+function drawMiniRaspberry(c, cx, cy, r, skin) {
+    var drupelets = [
+        {x: 0, y: 0, s: 4.5}, {x: 0, y: -6, s: 4}, {x: 0, y: 6, s: 4},
+        {x: -6, y: -3, s: 4}, {x: -6, y: 3, s: 4},
+        {x: 6, y: -3, s: 4}, {x: 6, y: 3, s: 4},
+        {x: -3, y: -8, s: 3}, {x: 3, y: -8, s: 3},
+        {x: 0, y: 9, s: 3}
+    ];
+    c.fillStyle = skin.bodyColor;
+    for (var i = 0; i < drupelets.length; i++) {
+        c.beginPath();
+        c.arc(cx + drupelets[i].x, cy + drupelets[i].y, drupelets[i].s, 0, Math.PI * 2);
+        c.fill();
+    }
+    c.fillStyle = 'rgba(255,255,255,0.2)';
+    for (var i = 0; i < drupelets.length; i++) {
+        c.beginPath();
+        c.arc(cx + drupelets[i].x - 1, cy + drupelets[i].y - 1, drupelets[i].s * 0.35, 0, Math.PI * 2);
+        c.fill();
+    }
+    c.fillStyle = skin.leafColor;
+    c.beginPath();
+    c.ellipse(cx - 4, cy - r * 0.8, 5, 3, -0.5, 0, Math.PI * 2);
+    c.fill();
+    c.beginPath();
+    c.ellipse(cx + 4, cy - r * 0.8, 5, 3, 0.5, 0, Math.PI * 2);
+    c.fill();
+}
+
+function drawMiniBlueberry(c, cx, cy, r, skin) {
+    c.fillStyle = skin.bodyColor;
+    c.beginPath();
+    c.arc(cx, cy + 1, r, 0, Math.PI * 2);
+    c.fill();
+    c.fillStyle = 'rgba(180,200,255,0.15)';
+    c.beginPath();
+    c.arc(cx, cy + 1, r * 0.9, 0, Math.PI * 2);
+    c.fill();
+    c.fillStyle = 'rgba(255,255,255,0.25)';
+    c.beginPath();
+    c.ellipse(cx - r * 0.3, cy - r * 0.2, r * 0.15, r * 0.35, -0.3, 0, Math.PI * 2);
+    c.fill();
+    c.fillStyle = skin.leafColor;
+    for (var i = 0; i < 5; i++) {
+        var angle = -Math.PI / 2 + (i / 5) * Math.PI * 2;
+        var tx = cx + Math.cos(angle) * 5;
+        var ty = cy - r * 0.6 + Math.sin(angle) * 3;
+        c.beginPath();
+        c.ellipse(tx, ty, 2.5, 4, angle + Math.PI / 2, 0, Math.PI * 2);
+        c.fill();
+    }
+}
+
+function drawMiniBlackberry(c, cx, cy, r, skin) {
+    var drupelets = [
+        {x: 0, y: -7, s: 3.5}, {x: 0, y: -1, s: 4}, {x: 0, y: 5, s: 4}, {x: 0, y: 10, s: 3},
+        {x: -6, y: -4, s: 3.5}, {x: -6, y: 2, s: 3.5}, {x: -5, y: 7, s: 3},
+        {x: 6, y: -4, s: 3.5}, {x: 6, y: 2, s: 3.5}, {x: 5, y: 7, s: 3}
+    ];
+    c.fillStyle = skin.bodyColor;
+    for (var i = 0; i < drupelets.length; i++) {
+        c.beginPath();
+        c.arc(cx + drupelets[i].x, cy + drupelets[i].y, drupelets[i].s, 0, Math.PI * 2);
+        c.fill();
+    }
+    c.fillStyle = 'rgba(255,255,255,0.15)';
+    for (var i = 0; i < drupelets.length; i++) {
+        c.beginPath();
+        c.arc(cx + drupelets[i].x - 0.8, cy + drupelets[i].y - 0.8, drupelets[i].s * 0.35, 0, Math.PI * 2);
+        c.fill();
+    }
+    c.fillStyle = skin.leafColor;
+    c.beginPath();
+    c.ellipse(cx - 4, cy - r * 1.0, 5, 3, -0.4, 0, Math.PI * 2);
+    c.fill();
+    c.beginPath();
+    c.ellipse(cx + 4, cy - r * 1.0, 5, 3, 0.4, 0, Math.PI * 2);
+    c.fill();
+}
+
 // ============================================================
 // SHOP BACK BUTTON
 // ============================================================
@@ -385,6 +597,32 @@ function initShop() {
     document.getElementById('btn-shop-back').addEventListener('click', function() {
         playClickSound();
         showScreen('MENU');
+    });
+}
+
+// ============================================================
+// VIP MAGAZINE
+// ============================================================
+function initVip() {
+    document.getElementById('btn-vip-back').addEventListener('click', function() {
+        playClickSound();
+        showScreen('MENU');
+    });
+
+    document.getElementById('vip-donate-btn').addEventListener('click', function() {
+        playClickSound();
+        document.getElementById('donate-modal').classList.remove('hidden');
+    });
+
+    document.getElementById('donate-modal-close').addEventListener('click', function() {
+        playClickSound();
+        document.getElementById('donate-modal').classList.add('hidden');
+    });
+
+    document.getElementById('donate-modal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            document.getElementById('donate-modal').classList.add('hidden');
+        }
     });
 }
 
@@ -434,11 +672,6 @@ function updateHUD() {
     // Territory percentage
     var pct = getTerritoryPercentage(1);
     document.getElementById('hud-territory-pct').textContent = pct.toFixed(1);
-
-    // Timer
-    var mins = Math.floor(gameTimer / 60);
-    var secs = Math.floor(gameTimer % 60);
-    document.getElementById('hud-timer').textContent = mins + ':' + (secs < 10 ? '0' : '') + secs;
 
     // Kills
     document.getElementById('hud-kills').textContent = player ? player.kills : 0;
@@ -601,21 +834,13 @@ function initTouchControls() {
 
         // Dead zone
         if (dist > 15) {
-            // Snap to 4 directions
-            var angle = Math.atan2(dy, dx);
-            var newDir;
-            if (angle > -Math.PI / 4 && angle <= Math.PI / 4) {
-                newDir = { dx: 1, dy: 0 }; // Right
-            } else if (angle > Math.PI / 4 && angle <= 3 * Math.PI / 4) {
-                newDir = { dx: 0, dy: 1 }; // Down
-            } else if (angle > -3 * Math.PI / 4 && angle <= -Math.PI / 4) {
-                newDir = { dx: 0, dy: -1 }; // Up
-            } else {
-                newDir = { dx: -1, dy: 0 }; // Left
-            }
+            // Free-angle direction (normalized)
+            var ndx = dx / dist;
+            var ndy = dy / dist;
+            var newDir = { dx: ndx, dy: ndy };
 
             // Prevent 180 turns
-            if (player && (newDir.dx !== -player.dx || newDir.dy !== -player.dy)) {
+            if (player && !(ndx === -player.dx && ndy === -player.dy)) {
                 inputDir = newDir;
             }
         }
@@ -645,6 +870,7 @@ function initTouchControls() {
     // Initialize all UI
     initMenu();
     initShop();
+    initVip();
     initSettings();
     initGameOver();
     initTouchControls();

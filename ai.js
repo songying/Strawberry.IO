@@ -8,6 +8,10 @@ var AI_RETURNING = 'RETURNING';
 var AI_HUNTING = 'HUNTING';
 var AI_IDLE = 'IDLE';
 
+function setAIDir(enemy, dx, dy) {
+    enemy.targetAngle = Math.atan2(dy, dx);
+}
+
 function initAI(enemy, aggression) {
     enemy.aiState = AI_IDLE;
     enemy.aiAggression = aggression;
@@ -78,8 +82,7 @@ function aiExpanding(enemy, dt) {
     }
 
     var wp = enemy.aiWaypoints[enemy.aiWaypointIndex];
-    enemy.dx = wp.dir.dx;
-    enemy.dy = wp.dir.dy;
+    setAIDir(enemy, wp.dir.dx, wp.dir.dy);
 
     // Count cell transitions
     var gpos = worldToGrid(enemy.x, enemy.y);
@@ -100,7 +103,7 @@ function aiExpanding(enemy, dt) {
     }
 
     // Safety: if trail is too long, abort and return
-    if (enemy.trail.length > 50) {
+    if (enemy.trail.length > 200) {
         enemy.aiState = AI_RETURNING;
         findReturnPath(enemy);
     }
@@ -126,8 +129,7 @@ function aiReturning(enemy, dt) {
     var gpos = worldToGrid(enemy.x, enemy.y);
     var dir = findDirectionToTerritory(enemy, gpos.gx, gpos.gy);
     if (dir) {
-        enemy.dx = dir.dx;
-        enemy.dy = dir.dy;
+        setAIDir(enemy, dir.dx, dir.dy);
     }
 }
 
@@ -139,7 +141,7 @@ function aiHunting(enemy, dt) {
     }
 
     // Safety: don't hunt too long outside territory
-    if (enemy.trail.length > 30) {
+    if (enemy.trail.length > 120) {
         enemy.aiState = AI_RETURNING;
         findReturnPath(enemy);
         return;
@@ -162,30 +164,24 @@ function aiHunting(enemy, dt) {
         return;
     }
 
-    // Move toward target
+    // Move toward target (allows diagonal)
     var ddx = tgx - gpos.gx;
     var ddy = tgy - gpos.gy;
-
-    if (Math.abs(ddx) > Math.abs(ddy)) {
-        enemy.dx = ddx > 0 ? 1 : -1;
-        enemy.dy = 0;
-    } else {
-        enemy.dx = 0;
-        enemy.dy = ddy > 0 ? 1 : -1;
+    var ndx = ddx > 0 ? 1 : (ddx < 0 ? -1 : 0);
+    var ndy = ddy > 0 ? 1 : (ddy < 0 ? -1 : 0);
+    if (ndx !== 0 && ndy !== 0) {
+        var dinv = 1 / Math.sqrt(2);
+        ndx *= dinv;
+        ndy *= dinv;
     }
+    setAIDir(enemy, ndx, ndy);
 
     // Prevent 180-degree turn into own trail
-    var nextGX = gpos.gx + enemy.dx;
-    var nextGY = gpos.gy + enemy.dy;
+    var nextGX = gpos.gx + Math.round(Math.cos(enemy.targetAngle));
+    var nextGY = gpos.gy + Math.round(Math.sin(enemy.targetAngle));
     if (isInBounds(nextGX, nextGY) && trailGrid[gridIndex(nextGX, nextGY)] === enemy.id) {
-        // Try perpendicular direction
-        if (enemy.dx !== 0) {
-            enemy.dy = Math.random() < 0.5 ? 1 : -1;
-            enemy.dx = 0;
-        } else {
-            enemy.dx = Math.random() < 0.5 ? 1 : -1;
-            enemy.dy = 0;
-        }
+        // Turn perpendicular
+        setAIDir(enemy, -ndy, ndx);
     }
 }
 
@@ -193,23 +189,25 @@ function aiHunting(enemy, dt) {
 // AI HELPERS
 // ============================================================
 function planRectangularLoop(enemy) {
-    var baseSize = 3;
-    var maxExtra = Math.floor(enemy.aiAggression * 12);
+    var baseSize = 12;
+    var maxExtra = Math.floor(enemy.aiAggression * 48);
     var loopWidth = baseSize + Math.floor(Math.random() * (maxExtra + 1));
     var loopHeight = baseSize + Math.floor(Math.random() * (maxExtra + 1));
 
+    var inv = 1 / Math.sqrt(2);
     // Pick a random rotation for the loop
     var patterns = [
-        // Clockwise variations
+        // Cardinal clockwise variations
         [{dx:0,dy:-1}, {dx:1,dy:0}, {dx:0,dy:1}, {dx:-1,dy:0}],
         [{dx:1,dy:0}, {dx:0,dy:1}, {dx:-1,dy:0}, {dx:0,dy:-1}],
         [{dx:0,dy:1}, {dx:-1,dy:0}, {dx:0,dy:-1}, {dx:1,dy:0}],
         [{dx:-1,dy:0}, {dx:0,dy:-1}, {dx:1,dy:0}, {dx:0,dy:1}],
-        // Counter-clockwise variations
-        [{dx:0,dy:-1}, {dx:-1,dy:0}, {dx:0,dy:1}, {dx:1,dy:0}],
-        [{dx:1,dy:0}, {dx:0,dy:-1}, {dx:-1,dy:0}, {dx:0,dy:1}],
-        [{dx:0,dy:1}, {dx:1,dy:0}, {dx:0,dy:-1}, {dx:-1,dy:0}],
-        [{dx:-1,dy:0}, {dx:0,dy:1}, {dx:1,dy:0}, {dx:0,dy:-1}]
+        // Diagonal diamond patterns
+        [{dx:inv,dy:-inv}, {dx:inv,dy:inv}, {dx:-inv,dy:inv}, {dx:-inv,dy:-inv}],
+        [{dx:-inv,dy:-inv}, {dx:inv,dy:-inv}, {dx:inv,dy:inv}, {dx:-inv,dy:inv}],
+        // Mixed: cardinal + diagonal
+        [{dx:0,dy:-1}, {dx:inv,dy:inv}, {dx:0,dy:1}, {dx:-inv,dy:-inv}],
+        [{dx:inv,dy:-inv}, {dx:1,dy:0}, {dx:-inv,dy:inv}, {dx:-1,dy:0}]
     ];
 
     var pattern = patterns[Math.floor(Math.random() * patterns.length)];
@@ -236,15 +234,20 @@ function findDirectionToTerritory(entity, gx, gy) {
     visited[gx + ',' + gy] = true;
     var qi = 0;
 
-    var dirs = [
-        {dx: 0, dy: -1},
-        {dx: 0, dy: 1},
-        {dx: -1, dy: 0},
-        {dx: 1, dy: 0}
+    var dinv = 1 / Math.sqrt(2);
+    // Grid steps (integers) for BFS traversal
+    var gridDirs = [
+        {sx: 0, sy: -1}, {sx: 0, sy: 1}, {sx: -1, sy: 0}, {sx: 1, sy: 0},
+        {sx: 1, sy: -1}, {sx: 1, sy: 1}, {sx: -1, sy: -1}, {sx: -1, sy: 1}
+    ];
+    // Normalized movement directions
+    var moveDirs = [
+        {dx: 0, dy: -1}, {dx: 0, dy: 1}, {dx: -1, dy: 0}, {dx: 1, dy: 0},
+        {dx: dinv, dy: -dinv}, {dx: dinv, dy: dinv}, {dx: -dinv, dy: -dinv}, {dx: -dinv, dy: dinv}
     ];
 
     // Limit BFS radius for performance
-    var maxSteps = 400;
+    var maxSteps = 1600;
     var steps = 0;
 
     while (qi < queue.length && steps < maxSteps) {
@@ -252,9 +255,9 @@ function findDirectionToTerritory(entity, gx, gy) {
         var cx = cur[0], cy = cur[1], firstDir = cur[2];
         steps++;
 
-        for (var d = 0; d < 4; d++) {
-            var nx = cx + dirs[d].dx;
-            var ny = cy + dirs[d].dy;
+        for (var d = 0; d < 8; d++) {
+            var nx = cx + gridDirs[d].sx;
+            var ny = cy + gridDirs[d].sy;
 
             if (!isInBounds(nx, ny)) continue;
             var key = nx + ',' + ny;
@@ -264,7 +267,7 @@ function findDirectionToTerritory(entity, gx, gy) {
             // Don't walk through own trail
             if (trailGrid[gridIndex(nx, ny)] === entity.id) continue;
 
-            var newFirstDir = firstDir || dirs[d];
+            var newFirstDir = firstDir || moveDirs[d];
 
             // Found own territory!
             if (territoryGrid[gridIndex(nx, ny)] === entity.id) {
@@ -275,20 +278,24 @@ function findDirectionToTerritory(entity, gx, gy) {
         }
     }
 
-    // Fallback: just move toward center of map
+    // Fallback: move toward center of map (allows diagonal)
     var centerGX = Math.floor(WORLD_GRID_SIZE / 2);
     var centerGY = Math.floor(WORLD_GRID_SIZE / 2);
     var ddx = centerGX - gx;
     var ddy = centerGY - gy;
-    if (Math.abs(ddx) > Math.abs(ddy)) {
-        return { dx: ddx > 0 ? 1 : -1, dy: 0 };
+    var fdx = ddx > 0 ? 1 : (ddx < 0 ? -1 : 0);
+    var fdy = ddy > 0 ? 1 : (ddy < 0 ? -1 : 0);
+    if (fdx !== 0 && fdy !== 0) {
+        var finv = 1 / Math.sqrt(2);
+        fdx *= finv;
+        fdy *= finv;
     }
-    return { dx: 0, dy: ddy > 0 ? 1 : -1 };
+    return { dx: fdx, dy: fdy };
 }
 
 function findNearbyTrail(enemy) {
     var gpos = worldToGrid(enemy.x, enemy.y);
-    var searchRadius = 15;
+    var searchRadius = 60;
 
     var bestDist = Infinity;
     var bestTarget = null;
