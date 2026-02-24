@@ -1266,7 +1266,7 @@ function startGame(modeId) {
     var centerGX = Math.floor(WORLD_GRID_SIZE / 2);
     var centerGY = Math.floor(WORLD_GRID_SIZE / 2);
     var saveData = loadSave();
-    player = createEntity(1, saveData.selectedSkin, 'You', centerGX, centerGY);
+    player = createEntity(1, saveData.selectedSkin, t('leaderboard.you'), centerGX, centerGY);
     initTerritory(1, centerGX, centerGY, PLAYER_START_RADIUS);
     inputDir = { dx: 0, dy: -1 };
 

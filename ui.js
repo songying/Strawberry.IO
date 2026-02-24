@@ -394,17 +394,17 @@ function renderShop() {
         // Name
         var nameEl = document.createElement('div');
         nameEl.className = 'skin-name';
-        nameEl.textContent = skin.name;
+        nameEl.textContent = t('skin.' + skinId);
         card.appendChild(nameEl);
 
         // Price or status
         var statusEl = document.createElement('div');
         if (equipped) {
             statusEl.className = 'skin-status equipped-label';
-            statusEl.textContent = 'Equipped';
+            statusEl.textContent = t('shop.equipped');
         } else if (owned) {
             statusEl.className = 'skin-status owned-label';
-            statusEl.textContent = 'Owned';
+            statusEl.textContent = t('shop.owned');
         } else {
             statusEl.className = 'skin-price';
             statusEl.textContent = '\u{1F353} ' + skin.price;
@@ -657,10 +657,10 @@ function refreshSettings() {
     var statsEl = document.getElementById('stats-display');
     var stats = saveData.stats;
     statsEl.innerHTML =
-        'Games Played: ' + stats.gamesPlayed + '<br>' +
-        'Total Kills: ' + stats.totalKills + '<br>' +
-        'Best Territory: ' + stats.bestTerritory.toFixed(1) + '%<br>' +
-        'Total Cells Captured: ' + stats.totalTerritory;
+        t('stats.gamesPlayed') + ': ' + stats.gamesPlayed + '<br>' +
+        t('stats.totalKills') + ': ' + stats.totalKills + '<br>' +
+        t('stats.bestTerritory') + ': ' + stats.bestTerritory.toFixed(1) + '%<br>' +
+        t('stats.totalCells') + ': ' + stats.totalTerritory;
 }
 
 // ============================================================
@@ -683,7 +683,7 @@ function updateHUD() {
     var puEl = document.getElementById('hud-powerup');
     if (player && player.activePowerUp) {
         var def = POWERUPS[player.activePowerUp];
-        puEl.textContent = def.icon + ' ' + def.name + ' ' + player.powerUpTimer.toFixed(1) + 's';
+        puEl.textContent = def.icon + ' ' + t('powerup.' + player.activePowerUp) + ' ' + player.powerUpTimer.toFixed(1) + 's';
         puEl.classList.remove('hidden');
     } else {
         puEl.classList.add('hidden');
@@ -696,7 +696,7 @@ function updateLeaderboard() {
 
     if (player) {
         entries.push({
-            name: 'You',
+            name: t('leaderboard.you'),
             pct: getTerritoryPercentage(1),
             color: SKINS[player.skinId].bodyColor,
             isPlayer: true
@@ -741,20 +741,20 @@ function renderGameOver() {
 
     var titleEl = document.getElementById('result-title');
     if (gameResults.won) {
-        titleEl.textContent = 'Victory!';
+        titleEl.textContent = t('gameover.victory');
         titleEl.className = 'win';
     } else {
-        titleEl.textContent = 'Game Over';
+        titleEl.textContent = t('gameover.title');
         titleEl.className = '';
     }
 
     var statsEl = document.getElementById('result-stats');
     statsEl.innerHTML =
-        'Territory: <span class="stat-value">' + gameResults.territoryPct + '%</span><br>' +
-        'Cells Captured: <span class="stat-value">' + gameResults.cellsCaptured + '</span><br>' +
-        'Kills: <span class="stat-value">' + gameResults.kills + '</span><br>' +
-        'Berries Earned: <span class="stat-value">+' + gameResults.berriesEarned + '</span><br>' +
-        'XP Earned: <span class="stat-value">+' + gameResults.xpEarned + '</span>';
+        t('gameover.territory') + '<span class="stat-value">' + gameResults.territoryPct + '%</span><br>' +
+        t('gameover.cellsCaptured') + '<span class="stat-value">' + gameResults.cellsCaptured + '</span><br>' +
+        t('gameover.kills') + '<span class="stat-value">' + gameResults.kills + '</span><br>' +
+        t('gameover.berries') + '<span class="stat-value">+' + gameResults.berriesEarned + '</span><br>' +
+        t('gameover.xp') + '<span class="stat-value">+' + gameResults.xpEarned + '</span>';
 }
 
 function initGameOver() {
@@ -860,6 +860,19 @@ function initTouchControls() {
 }
 
 // ============================================================
+// LANGUAGE SWITCH
+// ============================================================
+function initLangSwitch() {
+    var langBtns = document.querySelectorAll('.lang-btn');
+    langBtns.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            playClickSound();
+            setLanguage(btn.getAttribute('data-lang'));
+        });
+    });
+}
+
+// ============================================================
 // INITIALIZATION
 // ============================================================
 (function() {
@@ -874,12 +887,16 @@ function initTouchControls() {
     initSettings();
     initGameOver();
     initTouchControls();
+    initLangSwitch();
 
     // Initialize background music
     initBackgroundMusic();
 
     // Initialize game engine
     initGame();
+
+    // Apply saved language
+    applyLanguage();
 
     // Show main menu
     showScreen('MENU');

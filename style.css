@@ -237,8 +237,38 @@ canvas#gameCanvas {
 
 .menu-footer {
     position: absolute;
-    bottom: 8px;
+    bottom: 6px;
     color: rgba(255,255,255,0.3);
+    font-size: 11px;
+}
+
+.lang-switch {
+    position: absolute;
+    bottom: 22px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    z-index: 11;
+}
+.lang-btn {
+    background: none;
+    border: none;
+    color: rgba(255,255,255,0.35);
+    font-size: 11px;
+    cursor: pointer;
+    padding: 2px 6px;
+    border-radius: 4px;
+    transition: color 0.2s, background 0.2s;
+}
+.lang-btn:hover {
+    color: rgba(255,255,255,0.7);
+}
+.lang-btn.active {
+    color: #FF2D55;
+    font-weight: bold;
+}
+.lang-divider {
+    color: rgba(255,255,255,0.2);
     font-size: 11px;
 }
 

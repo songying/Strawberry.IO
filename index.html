@@ -15,10 +15,10 @@
         <!-- Main Menu -->
         <div id="screen-menu" class="screen">
             <div class="menu-top-bar">
-                <button id="btn-settings" class="icon-btn" title="Settings">&#9881;</button>
+                <button id="btn-settings" class="icon-btn" data-i18n="tooltip.settings" data-i18n-attr="title" title="Settings">&#9881;</button>
                 <div class="currency-display"><span class="berry-icon">&#127827;</span> <span id="berry-count">0</span></div>
-                <button id="btn-vip" class="icon-btn vip-menu-btn" title="Berry Pass">VIP</button>
-                <button id="btn-shop" class="icon-btn" title="Shop">&#128722;</button>
+                <button id="btn-vip" class="icon-btn vip-menu-btn" data-i18n="tooltip.berrypass" data-i18n-attr="title" title="Berry Pass">VIP</button>
+                <button id="btn-shop" class="icon-btn" data-i18n="tooltip.shop" data-i18n-attr="title" title="Shop">&#128722;</button>
             </div>
             <div class="menu-center">
                 <h1 class="game-title">Strawberry<span class="title-io">.io</span></h1>
@@ -28,21 +28,26 @@
                     <div class="xp-bar"><div class="xp-fill" id="xp-fill"></div></div>
                 </div>
             </div>
-            <button id="btn-start" class="btn-primary">START</button>
+            <button id="btn-start" class="btn-primary" data-i18n="start">START</button>
             <div class="mode-selector">
-                <button class="mode-btn" data-mode="peaceful">&#128330; Peaceful</button>
-                <button class="mode-btn active" data-mode="normal">&#9876; Normal</button>
-                <button class="mode-btn" data-mode="extreme">&#128128; Extreme</button>
-                <button class="mode-btn" data-mode="berry">&#127827; Berry</button>
+                <button class="mode-btn" data-mode="peaceful" data-i18n="mode.peaceful">&#128330; Peaceful</button>
+                <button class="mode-btn active" data-mode="normal" data-i18n="mode.normal">&#9876; Normal</button>
+                <button class="mode-btn" data-mode="extreme" data-i18n="mode.extreme">&#128128; Extreme</button>
+                <button class="mode-btn" data-mode="berry" data-i18n="mode.berry">&#127827; Berry</button>
             </div>
-            <div class="menu-footer">Designed by Jiashi &bull; Powered by Claude Code</div>
+            <div class="lang-switch">
+                <button class="lang-btn" data-lang="en">EN</button>
+                <span class="lang-divider">|</span>
+                <button class="lang-btn" data-lang="zh">中文</button>
+            </div>
+            <div class="menu-footer" data-i18n="footer">Designed by Jiashi &bull; Powered by Claude Code</div>
         </div>
 
         <!-- Shop Screen -->
         <div id="screen-shop" class="screen hidden">
             <div class="shop-header">
-                <button id="btn-shop-back" class="icon-btn">&#8592; Back</button>
-                <h2>Berry Shop</h2>
+                <button id="btn-shop-back" class="icon-btn" data-i18n="shop.back">&#8592; Back</button>
+                <h2 data-i18n="shop.title">Berry Shop</h2>
                 <div class="currency-display"><span class="berry-icon">&#127827;</span> <span id="berry-count-shop">0</span></div>
             </div>
             <div class="skin-grid" id="skin-grid"></div>
@@ -51,21 +56,21 @@
         <!-- Settings Screen -->
         <div id="screen-settings" class="screen hidden">
             <div class="settings-header">
-                <button id="btn-settings-back" class="icon-btn">&#8592; Back</button>
-                <h2>Settings</h2>
+                <button id="btn-settings-back" class="icon-btn" data-i18n="settings.back">&#8592; Back</button>
+                <h2 data-i18n="settings.title">Settings</h2>
                 <div style="width:80px"></div>
             </div>
             <div class="settings-body">
                 <label class="setting-row">
-                    <span>Sound Effects</span>
+                    <span data-i18n="settings.sound">Sound Effects</span>
                     <input type="checkbox" id="setting-sound" checked>
                 </label>
                 <label class="setting-row">
-                    <span>VIP Mode</span>
+                    <span data-i18n="settings.vip">VIP Mode</span>
                     <input type="checkbox" id="setting-vip">
                 </label>
                 <div class="setting-row stats-section">
-                    <h3>Stats</h3>
+                    <h3 data-i18n="settings.stats">Stats</h3>
                     <div id="stats-display"></div>
                 </div>
             </div>
@@ -75,7 +80,7 @@
         <div id="game-hud" class="hidden">
             <div class="hud-top">
                 <div class="hud-territory"><span id="hud-territory-pct">0</span>%</div>
-                <div class="hud-kills">Kills: <span id="hud-kills">0</span></div>
+                <div class="hud-kills"><span data-i18n="hud.kills">Kills: </span><span id="hud-kills">0</span></div>
             </div>
             <div id="hud-leaderboard" class="hud-leaderboard"></div>
             <div id="hud-powerup" class="hud-powerup hidden"></div>
@@ -84,11 +89,11 @@
         <!-- Game Over Screen -->
         <div id="screen-gameover" class="screen hidden">
             <div class="gameover-box">
-                <h1 id="result-title">Game Over</h1>
+                <h1 id="result-title" data-i18n="gameover.title">Game Over</h1>
                 <div id="result-stats" class="result-stats"></div>
                 <div class="gameover-buttons">
-                    <button id="btn-play-again" class="btn-primary">Play Again</button>
-                    <button id="btn-back-menu" class="btn-secondary">Menu</button>
+                    <button id="btn-play-again" class="btn-primary" data-i18n="gameover.playAgain">Play Again</button>
+                    <button id="btn-back-menu" class="btn-secondary" data-i18n="gameover.menu">Menu</button>
                 </div>
             </div>
         </div>
@@ -96,8 +101,8 @@
         <!-- VIP Berry Pass Screen -->
         <div id="screen-vip" class="screen hidden">
             <div class="vip-header">
-                <button id="btn-vip-back" class="icon-btn">&#8592; Back</button>
-                <h2>&#127827; Berry Pass</h2>
+                <button id="btn-vip-back" class="icon-btn" data-i18n="vip.back">&#8592; Back</button>
+                <h2 data-i18n="vip.title">&#127827; Berry Pass</h2>
                 <div style="width:80px"></div>
             </div>
             <div class="vip-body">
@@ -108,34 +113,34 @@
                     <div class="berry-float b4">&#129744;</div>
                     <div class="berry-pass-logo">
                         <span class="bp-berry">&#127827;</span>
-                        <span class="bp-text">BERRY<br>PASS</span>
+                        <span class="bp-text" data-i18n-html="vip.bannerText">BERRY<br>PASS</span>
                     </div>
                 </div>
 
                 <div class="bp-card bp-card-skins">
                     <div class="bp-card-icon">&#127912;</div>
                     <div class="bp-card-info">
-                        <div class="bp-card-title">7 Exclusive Skins</div>
-                        <div class="bp-card-desc">Golden Strawberry, Golden Raspberry, Golden Blueberry & more</div>
+                        <div class="bp-card-title" data-i18n="vip.perk1.title">7 Exclusive Skins</div>
+                        <div class="bp-card-desc" data-i18n="vip.perk1.desc">Golden Strawberry, Golden Raspberry, Golden Blueberry & more</div>
                     </div>
                 </div>
                 <div class="bp-card bp-card-badge">
                     <div class="bp-card-icon">&#127942;</div>
                     <div class="bp-card-info">
-                        <div class="bp-card-title">VIP Berry Badge</div>
-                        <div class="bp-card-desc">A shiny gold badge floats above your berry in-game</div>
+                        <div class="bp-card-title" data-i18n="vip.perk2.title">VIP Berry Badge</div>
+                        <div class="bp-card-desc" data-i18n="vip.perk2.desc">A shiny gold badge floats above your berry in-game</div>
                     </div>
                 </div>
                 <div class="bp-card bp-card-love">
                     <div class="bp-card-icon">&#127825;</div>
                     <div class="bp-card-info">
-                        <div class="bp-card-title">Feed the Berry Farm</div>
-                        <div class="bp-card-desc">Your support keeps Strawberry.io growing!</div>
+                        <div class="bp-card-title" data-i18n="vip.perk3.title">Feed the Berry Farm</div>
+                        <div class="bp-card-desc" data-i18n="vip.perk3.desc">Your support keeps Strawberry.io growing!</div>
                     </div>
                 </div>
 
-                <button id="vip-donate-btn" class="btn-berry-donate" type="button">&#127827; Support the Berry Farm &#127827;</button>
-                <p class="vip-note">After donating, toggle VIP in Settings to unlock your perks!</p>
+                <button id="vip-donate-btn" class="btn-berry-donate" type="button" data-i18n="vip.donateBtn">&#127827; Support the Berry Farm &#127827;</button>
+                <p class="vip-note" data-i18n="vip.note">After donating, toggle VIP in Settings to unlock your perks!</p>
 
                 <!-- Donate Modal -->
                 <div id="donate-modal" class="donate-modal hidden">
@@ -148,45 +153,45 @@
                             <span class="rain-b r4">&#127825;</span>
                             <span class="rain-b r5">&#129744;</span>
                         </div>
-                        <div class="donate-title">Pick Your Monthly Berry Basket!</div>
+                        <div class="donate-title" data-i18n="donate.title">Pick Your Monthly Berry Basket!</div>
                         <div class="donate-tiers">
                             <a class="donate-tier" href="https://paypal.me/strawberryio/1" target="_blank" rel="noopener">
                                 <span class="tier-icon">&#127827;</span>
-                                <span class="tier-name">Seedling</span>
+                                <span class="tier-name" data-i18n="donate.tier1">Seedling</span>
                                 <span class="tier-price">$1/mo</span>
                             </a>
                             <a class="donate-tier tier-popular" href="https://paypal.me/strawberryio/5" target="_blank" rel="noopener">
-                                <span class="tier-badge">Best Value</span>
+                                <span class="tier-badge" data-i18n="donate.tier2badge">Best Value</span>
                                 <span class="tier-icon">&#127827;&#127827;&#127827;</span>
-                                <span class="tier-name">Berry Bunch</span>
+                                <span class="tier-name" data-i18n="donate.tier2">Berry Bunch</span>
                                 <span class="tier-price">$5/mo</span>
                             </a>
                             <a class="donate-tier" href="https://paypal.me/strawberryio/10" target="_blank" rel="noopener">
                                 <span class="tier-icon">&#129744;&#127827;&#129744;</span>
-                                <span class="tier-name">Berry King</span>
+                                <span class="tier-name" data-i18n="donate.tier3">Berry King</span>
                                 <span class="tier-price">$10/mo</span>
                             </a>
                         </div>
-                        <p class="donate-thanks">Monthly support keeps the berry farm growing every season!</p>
+                        <p class="donate-thanks" data-i18n="donate.thanks">Monthly support keeps the berry farm growing every season!</p>
                     </div>
                 </div>
 
                 <div class="bp-changelog">
-                    <h3>&#128240; Berry Patch Notes</h3>
+                    <h3 data-i18n="vip.changelog">&#128240; Berry Patch Notes</h3>
                     <div class="bp-log">
                         <span class="bp-ver">v1.2</span>
                         <span class="bp-dot"></span>
-                        <span>Each berry gets its own unique shape!</span>
+                        <span data-i18n="vip.log1">Each berry gets its own unique shape!</span>
                     </div>
                     <div class="bp-log">
                         <span class="bp-ver">v1.1</span>
                         <span class="bp-dot"></span>
-                        <span>Smooth trails & encirclement captures</span>
+                        <span data-i18n="vip.log2">Smooth trails & encirclement captures</span>
                     </div>
                     <div class="bp-log">
                         <span class="bp-ver">v1.0</span>
                         <span class="bp-dot"></span>
-                        <span>Strawberry.io is born!</span>
+                        <span data-i18n="vip.log3">Strawberry.io is born!</span>
                     </div>
                 </div>
             </div>
@@ -198,10 +203,11 @@
         </div>
     </div>
 
-    <script src="data.js?v=26"></script>
-    <script src="audio.js?v=26"></script>
-    <script src="game.js?v=26"></script>
-    <script src="ai.js?v=26"></script>
-    <script src="ui.js?v=26"></script>
+    <script src="i18n.js?v=27"></script>
+    <script src="data.js?v=27"></script>
+    <script src="audio.js?v=27"></script>
+    <script src="game.js?v=27"></script>
+    <script src="ai.js?v=27"></script>
+    <script src="ui.js?v=27"></script>
 </body>
 </html>
